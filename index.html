@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tejiendo Compañía</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream:#FAF5EC; --ink:#2B2621; --ink-soft:#5A534A;
+    --plum:#5B4577; --plum-deep:#3E2F54; --plum-tint:#EEE7F3;
+    --terracotta:#BF6A4D; --terracotta-tint:#F6E4DC;
+    --sage:#5E8267; --sage-tint:#E7F0E7;
+    --gold:#C98A2B; --gold-tint:#FBEFD8;
+    --surface:#FFFFFF; --border:#E7DECD;
+    --font-body:'Atkinson Hyperlegible', Arial, sans-serif;
+    --font-display:'Fraunces', Georgia, serif;
+    --scale:1;
+    padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --cream:#211D18; --ink:#F3EDE1; --ink-soft:#C9C0B0; --surface:#2B261F; --border:#453E32;
+      --plum-tint:#3E2F54; --terracotta-tint:#4A3226; --sage-tint:#28362B; --gold-tint:#4A3812;
+    }
+  }
+  :root[data-theme="dark"] {
+    --cream:#211D18; --ink:#F3EDE1; --ink-soft:#C9C0B0; --surface:#2B261F; --border:#453E32;
+    --plum-tint:#3E2F54; --terracotta-tint:#4A3226; --sage-tint:#28362B; --gold-tint:#4A3812;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html { height:100%; scroll-padding-top:env(safe-area-inset-top,0px); }
+  body {
+    height:100%; background:var(--cream); color:var(--ink); font-family:var(--font-body);
+    font-size:calc(17px * var(--scale)); line-height:1.6; -webkit-font-smoothing:antialiased;
+  }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration:0.01ms !important; transition-duration:0.01ms !important; } }
+  .wrap { max-width:480px; margin:0 auto; padding:0 1.4rem 2.5rem; }
+  .view { display:none; }
+  .view.active { display:block; animation: viewIn .35s ease both; }
+  @keyframes viewIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+
+  button, .btn { font-family:var(--font-body); }
+  button:focus-visible, a:focus-visible { outline:3px solid var(--plum); outline-offset:2px; }
+
+  /* Top toolbar: back + font controls + read aloud */
+  .toolbar { display:flex; align-items:center; gap:.6rem; padding:1rem 1.4rem; max-width:480px; margin:0 auto; }
+  .icon-btn { background:var(--surface); border:1.5px solid var(--border); border-radius:12px; width:46px; height:46px; font-size:19px; cursor:pointer; transition:transform .12s ease; }
+  .icon-btn:active { transform:scale(0.93); }
+  .toolbar h2 { font-family:var(--font-display); font-weight:600; font-size:19px; flex:1; }
+  .font-controls { display:flex; gap:4px; margin-left:auto; }
+  .font-controls button { background:var(--surface); border:1.5px solid var(--border); border-radius:10px; width:38px; height:38px; font-size:14px; font-weight:700; cursor:pointer; }
+  .read-btn { display:flex; align-items:center; gap:8px; background:var(--plum-tint); color:var(--plum-deep); border:none; border-radius:12px; padding:.7rem 1rem; font-size:15px; font-weight:700; cursor:pointer; margin:.2rem 0 1.2rem; }
+  .read-btn.speaking { background:var(--plum); color:#fff; }
+
+  /* Hero */
+  header.hero { background:linear-gradient(180deg, var(--plum-tint), var(--cream)); padding:1.5rem 0 2rem; text-align:left; border-radius:0 0 32px 32px; position:relative; overflow:hidden; }
+  .hero-stitch { display:block; width:120px; height:28px; margin-bottom:14px; }
+  .hero-stitch path { fill:none; stroke:var(--terracotta); stroke-width:3; stroke-linecap:round; stroke-dasharray:260; stroke-dashoffset:260; animation:draw 1.4s ease forwards .2s; }
+  @keyframes draw { to { stroke-dashoffset:0; } }
+  .brand { font-size:14px; font-weight:700; color:var(--plum-deep); letter-spacing:.02em; margin-bottom:10px; }
+  h1 { font-family:var(--font-display); font-weight:600; font-size:calc(30px * var(--scale)); line-height:1.25; color:var(--plum-deep); margin-bottom:12px; max-width:20ch; }
+  .subtitle { font-size:calc(16px * var(--scale)); color:var(--ink-soft); margin-bottom:26px; max-width:32ch; }
+
+  .btn { display:inline-flex; align-items:center; gap:8px; border:none; border-radius:14px; padding:1.05rem 1.8rem; font-size:calc(16px * var(--scale)); font-weight:700; cursor:pointer; transition:transform .12s ease; }
+  .btn:active { transform:scale(0.97); }
+  .btn-primary { background:var(--plum); color:#fff; }
+  .btn-full { display:flex; width:100%; justify-content:center; text-align:center; }
+
+  section { padding:2rem 0 0; }
+  .wrap > section:first-of-type { padding-top:2.2rem; }
+  .section-title { font-family:var(--font-display); font-size:calc(19px * var(--scale)); font-weight:600; margin-bottom:16px; }
+
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .feature-card { background:var(--surface); border:1.5px solid var(--border); border-radius:18px; padding:1.3rem 1.1rem; text-align:left; cursor:pointer; transition:transform .12s ease, border-color .12s ease; }
+  .feature-card:active { transform:scale(0.97); }
+  .feature-card .icon { font-size:26px; margin-bottom:10px; display:block; }
+  .feature-card p { font-size:calc(15px * var(--scale)); font-weight:700; }
+
+  .steps { display:flex; flex-direction:column; gap:10px; }
+  .step { display:flex; align-items:center; gap:14px; background:var(--surface); border:1.5px solid var(--border); border-radius:16px; padding:1rem 1.1rem; }
+  .step-num { flex-shrink:0; width:32px; height:32px; border-radius:50%; background:var(--terracotta-tint); color:var(--terracotta); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+  .step p { font-size:calc(15px * var(--scale)); }
+
+  .family { background:linear-gradient(180deg, var(--terracotta-tint), var(--cream)); border-radius:26px; padding:2rem 1.6rem; text-align:left; margin:2rem 0 0; }
+  .family h2 { font-family:var(--font-display); font-size:calc(20px * var(--scale)); font-weight:600; margin-bottom:8px; }
+  .family p { font-size:calc(15px * var(--scale)); color:var(--ink-soft); margin-bottom:18px; }
+  .btn-secondary { background:var(--surface); color:var(--terracotta); border:1.5px solid var(--terracotta); width:100%; justify-content:center; }
+  footer { text-align:left; padding:1.6rem 0 1rem; font-size:13px; color:var(--ink-soft); }
+
+  /* Home */
+  .greet { font-family:var(--font-display); font-size:calc(23px * var(--scale)); font-weight:600; margin-bottom:4px; }
+  .greet-sub { font-size:calc(15px * var(--scale)); color:var(--ink-soft); margin-bottom:22px; }
+  .menu-card { width:100%; background:var(--surface); border:1.5px solid var(--border); border-radius:18px; padding:1.2rem 1.3rem; font-size:calc(17px * var(--scale)); font-weight:700; display:flex; align-items:center; gap:14px; text-align:left; cursor:pointer; margin-bottom:11px; color:var(--ink); transition:transform .12s ease; }
+  .menu-card:active { transform:scale(0.98); }
+  .menu-card .icon { font-size:25px; }
+  .notice { display:flex; align-items:center; gap:10px; background:var(--gold-tint); border:1.5px solid var(--gold); border-radius:14px; padding:.9rem 1.1rem; margin-top:10px; font-size:calc(14px * var(--scale)); color:var(--ink); }
+
+  /* Calculadora */
+  .field-label { font-size:calc(14px * var(--scale)); font-weight:700; color:var(--ink-soft); margin:18px 0 9px; }
+  .option-row { display:flex; gap:9px; }
+  .option-btn { flex:1; padding:1rem; font-size:calc(15px * var(--scale)); border-radius:12px; border:1.5px solid var(--border); background:var(--surface); color:var(--ink); cursor:pointer; font-weight:600; transition:all .12s ease; }
+  .option-btn.selected { border:2px solid var(--plum); background:var(--plum-tint); color:var(--plum-deep); }
+  .result-box { text-align:left; font-size:calc(24px * var(--scale)); font-weight:700; margin-top:22px; padding:1.3rem 1.4rem; background:var(--plum-tint); color:var(--plum-deep); border-radius:16px; font-family:var(--font-display); }
+
+  /* Contador */
+  .counter-num { text-align:center; font-family:var(--font-display); font-size:68px; font-weight:600; margin:1.6rem 0; color:var(--plum-deep); }
+  .counter-row { display:flex; gap:14px; margin-bottom:14px; }
+  .counter-btn { flex:1; padding:1.7rem; font-size:32px; border-radius:16px; border:1.5px solid var(--border); background:var(--surface); color:var(--ink); cursor:pointer; transition:transform .1s ease; }
+  .counter-btn:active { transform:scale(0.95); background:var(--plum-tint); }
+  .reset-btn { display:block; width:100%; text-align:center; padding:.8rem; font-size:calc(14px * var(--scale)); color:var(--ink-soft); background:none; border:none; cursor:pointer; text-decoration:underline; }
+
+  /* Comunidad */
+  .group-card { background:var(--surface); border:1.5px solid var(--border); border-radius:16px; padding:1.1rem 1.2rem; margin-bottom:11px; }
+  .group-card p.title { font-weight:700; font-size:calc(16px * var(--scale)); margin-bottom:4px; }
+  .group-card p.meta { font-size:calc(13px * var(--scale)); color:var(--ink-soft); margin-bottom:12px; }
+  .join-btn { padding:.7rem 1.1rem; font-size:calc(14px * var(--scale)); border-radius:10px; border:1.5px solid var(--plum); background:none; color:var(--plum); font-weight:700; cursor:pointer; }
+  .join-btn.joined { background:var(--sage); color:#fff; border-color:var(--sage); }
+
+  /* Bienestar */
+  .list-card { background:var(--surface); border:1.5px solid var(--border); border-radius:16px; padding:1.1rem 1.2rem; margin-bottom:11px; display:flex; align-items:center; gap:13px; }
+  .list-card .icon { font-size:23px; }
+  .list-card span.label { font-size:calc(15px * var(--scale)); font-weight:600; }
+  .toggle-btn { margin-left:auto; padding:.6rem 1rem; font-size:calc(13px * var(--scale)); font-weight:700; border-radius:10px; border:1.5px solid var(--border); background:var(--cream); cursor:pointer; }
+  .toggle-btn.done { background:var(--sage-tint); color:var(--sage); border-color:var(--sage); }
+
+  /* Familia */
+  .msg-card { background:var(--surface); border:1.5px solid var(--border); border-radius:16px; padding:1.1rem 1.2rem; margin-bottom:11px; }
+  .msg-card p.from { font-weight:700; font-size:calc(14px * var(--scale)); margin-bottom:4px; }
+  .msg-card p.body { font-size:calc(15px * var(--scale)); color:var(--ink-soft); }
+  textarea { width:100%; border:1.5px solid var(--border); border-radius:12px; padding:1rem; font-size:calc(15px * var(--scale)); margin-top:10px; background:var(--surface); color:var(--ink); font-family:inherit; resize:vertical; min-height:70px; }
+
+  /* Voice assistant */
+  .voice-fab { position:fixed; right:20px; bottom:calc(20px + env(safe-area-inset-bottom,0px)); width:64px; height:64px; border-radius:50%; background:var(--plum); color:#fff; border:none; font-size:26px; box-shadow:0 6px 18px rgba(43,26,58,.28); cursor:pointer; z-index:50; transition:transform .15s ease; }
+  .voice-fab:active { transform:scale(0.92); }
+  .voice-fab.listening { animation:pulse 1.1s ease-in-out infinite; background:var(--terracotta); }
+  @keyframes pulse { 0%,100%{ box-shadow:0 0 0 0 rgba(191,106,77,.45);} 50%{ box-shadow:0 0 0 14px rgba(191,106,77,0);} }
+  .voice-toast { position:fixed; left:50%; bottom:100px; transform:translateX(-50%); background:var(--ink); color:var(--cream); padding:.7rem 1.1rem; border-radius:12px; font-size:14px; max-width:80%; text-align:center; z-index:51; opacity:0; pointer-events:none; transition:opacity .2s ease; }
+  .voice-toast.show { opacity:1; }
+</style>
+</head>
+<body>
+
+<!-- LANDING -->
+<div class="view active" id="view-landing">
+  <header class="hero">
+    <div class="wrap">
+      <svg class="hero-stitch" viewBox="0 0 120 28" aria-hidden="true"><path d="M2 20 Q 16 4, 30 20 T 58 20 T 86 20 T 114 20"/></svg>
+      <p class="brand">TEJIENDO COMPAÑÍA</p>
+      <h1>Compañía y propósito para la tercera edad</h1>
+      <p class="subtitle">Tejer, cuidarte y conectar con otras personas, todo en un solo lugar</p>
+      <button class="btn btn-primary" onclick="go('home')">Comenzar gratis</button>
+    </div>
+  </header>
+  <section>
+    <div class="wrap">
+      <p class="section-title">Todo lo que necesitas</p>
+      <div class="grid2">
+        <div class="feature-card" onclick="go('home')"><span class="icon">🧶</span><p>Tejido guiado</p></div>
+        <div class="feature-card" onclick="go('comunidad')"><span class="icon">👥</span><p>Grupos y encuentros</p></div>
+        <div class="feature-card" onclick="go('bienestar')"><span class="icon">🧠</span><p>Bienestar diario</p></div>
+        <div class="feature-card" onclick="go('familia')"><span class="icon">💌</span><p>Círculo familiar</p></div>
+      </div>
+    </div>
+  </section>
+  <section>
+    <div class="wrap">
+      <p class="section-title">Así de simple</p>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><p>Elige tu proyecto o actividad favorita</p></div>
+        <div class="step"><div class="step-num">2</div><p>Sigue los pasos, uno a la vez, a tu ritmo</p></div>
+        <div class="step"><div class="step-num">3</div><p>Comparte tu avance con otras personas</p></div>
+      </div>
+    </div>
+  </section>
+  <div class="wrap">
+    <div class="family">
+      <h2>¿Tienes un familiar mayor?</h2>
+      <p>Ayúdalo a instalar la app en un par de minutos</p>
+      <button class="btn btn-secondary" onclick="go('home')">Descargar app</button>
+    </div>
+    <footer><p>Tejiendo Compañía — proyecto universitario</p></footer>
+  </div>
+</div>
+
+<!-- HOME -->
+<div class="view" id="view-home">
+  <div class="toolbar">
+    <div class="font-controls" style="margin-left:0">
+      <button onclick="changeScale(-0.1)" aria-label="Reducir letra">A−</button>
+      <button onclick="changeScale(0.1)" aria-label="Agrandar letra">A+</button>
+    </div>
+  </div>
+  <div class="wrap" style="padding-top:.5rem">
+    <p class="greet">Hola, María</p>
+    <p class="greet-sub">¿Qué quieres hacer hoy?</p>
+    <button class="menu-card" onclick="go('tejido')"><span class="icon">🧶</span>Mi tejido</button>
+    <button class="menu-card" onclick="go('comunidad')"><span class="icon">👥</span>Mi comunidad</button>
+    <button class="menu-card" onclick="go('bienestar')"><span class="icon">🧠</span>Bienestar</button>
+    <button class="menu-card" onclick="go('familia')"><span class="icon">💌</span>Círculo familiar</button>
+    <div class="notice">🔔 Encuentro de tejido, mañana 4pm</div>
+  </div>
+</div>
+
+<!-- MI TEJIDO -->
+<div class="view" id="view-tejido">
+  <div class="toolbar"><button class="icon-btn" onclick="go('home')" aria-label="Volver">←</button><h2>Mi tejido</h2></div>
+  <div class="wrap">
+    <button class="menu-card" onclick="go('calculadora')"><span class="icon">📐</span>Calculadora de patrones</button>
+    <button class="menu-card" onclick="go('contador')"><span class="icon">🔢</span>Contador de vueltas</button>
+  </div>
+</div>
+
+<!-- CALCULADORA -->
+<div class="view" id="view-calculadora">
+  <div class="toolbar"><button class="icon-btn" onclick="go('tejido')" aria-label="Volver">←</button><h2>Calculadora</h2></div>
+  <div class="wrap">
+    <button class="read-btn" onclick="readView('calculadora')">🔊 Escuchar instrucciones</button>
+    <p class="field-label">Estilo</p>
+    <div class="option-row">
+      <button class="option-btn selected" id="estilo-agujas" onclick="setEstilo('agujas')">Dos agujas</button>
+      <button class="option-btn" id="estilo-crochet" onclick="setEstilo('crochet')">Crochet</button>
+    </div>
+    <p class="field-label">Talla</p>
+    <div class="option-row">
+      <button class="option-btn" id="talla-s" onclick="setTalla('s')">S</button>
+      <button class="option-btn selected" id="talla-m" onclick="setTalla('m')">M</button>
+      <button class="option-btn" id="talla-l" onclick="setTalla('l')">L</button>
+    </div>
+    <button class="btn btn-primary btn-full" style="margin-top:22px" onclick="calcular()">Calcular</button>
+    <div class="result-box" id="resultado">— puntos</div>
+  </div>
+</div>
+
+<!-- CONTADOR -->
+<div class="view" id="view-contador">
+  <div class="toolbar"><button class="icon-btn" onclick="go('tejido')" aria-label="Volver">←</button><h2>Contador de vueltas</h2></div>
+  <div class="wrap">
+    <div class="counter-num" id="counter-val">0</div>
+    <div class="counter-row">
+      <button class="counter-btn" onclick="changeCounter(-1)" aria-label="Restar vuelta">−</button>
+      <button class="counter-btn" onclick="changeCounter(1)" aria-label="Sumar vuelta">+</button>
+    </div>
+    <button class="reset-btn" onclick="resetCounter()">Reiniciar</button>
+  </div>
+</div>
+
+<!-- COMUNIDAD -->
+<div class="view" id="view-comunidad">
+  <div class="toolbar"><button class="icon-btn" onclick="go('home')" aria-label="Volver">←</button><h2>Mi comunidad</h2></div>
+  <div class="wrap">
+    <button class="read-btn" onclick="readView('comunidad')">🔊 Escuchar encuentros</button>
+    <div class="group-card"><p class="title">Encuentro de tejido</p><p class="meta">Mañana, 4:00 pm · Centro comunitario</p><button class="join-btn" onclick="toggleJoin(this)">Unirme</button></div>
+    <div class="group-card"><p class="title">Taller de bufandas</p><p class="meta">Viernes, 11:00 am · Sala vecinal</p><button class="join-btn" onclick="toggleJoin(this)">Unirme</button></div>
+    <div class="group-card"><p class="title">Café y tejido</p><p class="meta">Sábado, 5:00 pm · Plaza central</p><button class="join-btn" onclick="toggleJoin(this)">Unirme</button></div>
+  </div>
+</div>
+
+<!-- BIENESTAR -->
+<div class="view" id="view-bienestar">
+  <div class="toolbar"><button class="icon-btn" onclick="go('home')" aria-label="Volver">←</button><h2>Bienestar</h2></div>
+  <div class="wrap">
+    <div class="list-card"><span class="icon">💊</span><span class="label">Medicamento, 9:00 am</span><button class="toggle-btn" onclick="toggleDone(this,'Tomado')">Ya lo tomé</button></div>
+    <div class="list-card"><span class="icon">🧠</span><span class="label">Gimnasia mental, 10 min</span><button class="toggle-btn" onclick="toggleDone(this,'Hecho')">Comenzar</button></div>
+    <div class="list-card"><span class="icon">🧘</span><span class="label">Estiramientos suaves</span><button class="toggle-btn" onclick="toggleDone(this,'Hecho')">Comenzar</button></div>
+  </div>
+</div>
+
+<!-- FAMILIA -->
+<div class="view" id="view-familia">
+  <div class="toolbar"><button class="icon-btn" onclick="go('home')" aria-label="Volver">←</button><h2>Círculo familiar</h2></div>
+  <div class="wrap">
+    <button class="read-btn" onclick="readView('familia')">🔊 Escuchar mensaje</button>
+    <div class="msg-card"><p class="from">Tu hija</p><p class="body">"Mamá, mira cómo creció Tomás 📷"</p></div>
+    <textarea id="replyText" placeholder="Escribe una respuesta..." aria-label="Escribir respuesta"></textarea>
+    <button class="btn btn-primary btn-full" style="margin-top:10px" onclick="sendReply()">Enviar</button>
+    <div id="sentMsgs"></div>
+  </div>
+</div>
+
+<button class="voice-fab" id="voiceFab" onclick="toggleVoice()" aria-label="Asistente de voz">🎤</button>
+<div class="voice-toast" id="voiceToast"></div>
+
+<script>
+function go(view) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// Tamaño de letra (accesibilidad)
+let scale = parseFloat(localStorage.getItem('tc_scale') || '1');
+function applyScale(){ document.documentElement.style.setProperty('--scale', scale); }
+function changeScale(d){
+  scale = Math.min(1.5, Math.max(0.85, +(scale + d).toFixed(2)));
+  localStorage.setItem('tc_scale', scale);
+  applyScale();
+}
+applyScale();
+
+// Calculadora
+let estilo = 'agujas', talla = 'm';
+function setEstilo(v){ estilo=v; document.getElementById('estilo-agujas').classList.toggle('selected', v==='agujas'); document.getElementById('estilo-crochet').classList.toggle('selected', v==='crochet'); }
+function setTalla(v){ talla=v; ['s','m','l'].forEach(t => document.getElementById('talla-'+t).classList.toggle('selected', t===v)); }
+function calcular(){
+  const base = { s:76, m:84, l:94 }[talla];
+  const puntos = estilo==='crochet' ? Math.round(base*1.22) : base;
+  document.getElementById('resultado').textContent = puntos + ' puntos';
+}
+
+// Contador
+let count = parseInt(localStorage.getItem('tc_counter') || '0', 10);
+function renderCounter(){ document.getElementById('counter-val').textContent = count; }
+function changeCounter(d){ count = Math.max(0, count+d); localStorage.setItem('tc_counter', count); renderCounter(); }
+function resetCounter(){ count = 0; localStorage.setItem('tc_counter', count); renderCounter(); }
+renderCounter();
+
+function toggleJoin(btn){ const j = btn.classList.toggle('joined'); btn.textContent = j ? 'Inscrita ✓' : 'Unirme'; }
+function toggleDone(btn, label){ const d = btn.classList.toggle('done'); btn.textContent = d ? label : 'Comenzar'; }
+function sendReply(){
+  const el = document.getElementById('replyText'); const text = el.value.trim(); if(!text) return;
+  const div = document.createElement('div'); div.className='msg-card'; div.style.marginTop='10px';
+  div.innerHTML = '<p class="from">Tú</p><p class="body">'+text.replace(/</g,'&lt;')+'</p>';
+  document.getElementById('sentMsgs').prepend(div); el.value='';
+}
+
+// --- Asistente de voz ---
+const synth = window.speechSynthesis;
+function speak(text){
+  if(!synth) return;
+  synth.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'es-ES'; u.rate = 0.95;
+  synth.speak(u);
+}
+const readTexts = {
+  calculadora: 'Elige tu estilo de tejido, dos agujas o crochet, luego tu talla, y toca calcular. La app te dirá cuántos puntos necesitas.',
+  comunidad: 'Tienes tres encuentros disponibles. Encuentro de tejido mañana a las cuatro de la tarde. Taller de bufandas el viernes a las once de la mañana. Café y tejido el sábado a las cinco de la tarde.',
+  familia: 'Tu hija te dejó un mensaje: Mamá, mira cómo creció Tomás.'
+};
+function readView(key){
+  const btn = event.currentTarget;
+  btn.classList.add('speaking');
+  speak(readTexts[key]);
+  setTimeout(() => btn.classList.remove('speaking'), 4000);
+}
+
+function showToast(msg){
+  const t = document.getElementById('voiceToast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null, listening = false;
+if (SR) {
+  recognition = new SR();
+  recognition.lang = 'es-ES';
+  recognition.interimResults = false;
+  recognition.onresult = (e) => {
+    const said = e.results[0][0].transcript.toLowerCase();
+    handleVoiceCommand(said);
+  };
+  recognition.onend = () => { listening = false; document.getElementById('voiceFab').classList.remove('listening'); };
+  recognition.onerror = () => { listening = false; document.getElementById('voiceFab').classList.remove('listening'); showToast('No te escuché bien, intenta de nuevo'); };
+}
+
+function toggleVoice(){
+  if (!recognition) { showToast('Tu navegador no permite el micrófono aquí'); return; }
+  if (listening) { recognition.stop(); return; }
+  listening = true;
+  document.getElementById('voiceFab').classList.add('listening');
+  showToast('Te escucho...');
+  recognition.start();
+}
+
+function handleVoiceCommand(text){
+  const map = [
+    { k:['tejido','tejer'], v:'tejido', say:'Abriendo mi tejido' },
+    { k:['calculadora','patrón','patron'], v:'calculadora', say:'Abriendo la calculadora' },
+    { k:['contador','vueltas'], v:'contador', say:'Abriendo el contador de vueltas' },
+    { k:['comunidad','encuentro','grupo'], v:'comunidad', say:'Abriendo tu comunidad' },
+    { k:['bienestar','medicamento','ejercicio'], v:'bienestar', say:'Abriendo bienestar' },
+    { k:['familia','círculo','circulo'], v:'familia', say:'Abriendo tu círculo familiar' },
+    { k:['inicio','casa','menú','menu'], v:'home', say:'Volviendo al inicio' },
+  ];
+  const match = map.find(m => m.k.some(kw => text.includes(kw)));
+  if (match) { showToast('Escuché: "' + text + '"'); speak(match.say); go(match.v); }
+  else { showToast('No entendí: "' + text + '"'); speak('No entendí, intenta decir por ejemplo, abrir mi comunidad'); }
+}
+</script>
+
+</body>
+</html>
