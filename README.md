@@ -21,6 +21,7 @@ Proyecto de emprendimiento e innovación social que combate la soledad no desead
 - [Caso de uso: un día con María](docs/04-caso-de-uso.md)
 - [Modelo de negocio (Lean Canvas)](docs/05-modelo-de-negocio.md)
 - [Roadmap y validación](docs/06-roadmap-y-validacion.md)
+- [Diseño accesible, animación y asistente de voz](docs/07-diseno-accesible-y-voz.md)
 
 ## Prototipo navegable
 
